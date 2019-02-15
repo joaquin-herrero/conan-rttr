@@ -1,4 +1,4 @@
-from   conans       import ConanFile, CMake, tools
+from   conans       import ConanFile, CMake
 from   conans.tools import download, unzip
 import os
 
@@ -10,8 +10,20 @@ class RttrConan(ConanFile):
     license         = "MIT"                                         
     settings        = "arch", "build_type", "compiler", "os"
     generators      = "cmake"
-    options         = {"shared": [True, False], "rtti": [True, False]} 
-    default_options = "shared=True", "rtti=True"
+    options         = {"shared": [True, False], 
+                       "build_rttr_dynamic": [True, False],
+                       "build_unit_tests": [True, False],
+                       "build_with_static_runtime_libs": [True, False],
+                       "build_with_rtti": [True, False],
+                       "build_benchmarks": [True, False],
+                       "build_examples": [True, False],
+                       "build_documentation": [True, False],
+                       "build_installer": [True, False],
+                       "build_package": [True, False],
+                       "use_pch": [True, False],
+                       "custom_doxygen_style": [True, False],
+                       "build_website_docu": [True, False]} 
+    default_options = "shared=True", "build_rttr_dynamic=True", "build_unit_tests=False", "build_with_static_runtime_libs=False", "build_with_rtti=True", "build_benchmarks=False", "build_examples=False", "build_documentation=False", "build_installer=True", "build_package=True", "use_pch=True", "custom_doxygen_style=True", "build_website_docu=False"
 
     def source(self):
         zip_name = "v%s.zip" % self.version
@@ -20,11 +32,24 @@ class RttrConan(ConanFile):
         os.unlink(zip_name)
 
     def build(self):
-        cmake          = CMake(self)
-        shared_options = "-DBUILD_STATIC=OFF" if self.options.shared else "-DBUILD_STATIC=ON"
-        rtti_options   = "-DBUILD_WITH_RTTI=ON" if self.options.rtti else "-DBUILD_WITH_RTTI=OFF"
-        self.run("cmake %s-%s %s %s %s" % (self.name, self.version, cmake.command_line, shared_options, rtti_options))
-        self.run("cmake --build . %s" % cmake.build_config)
+        cmake = CMake(self)
+
+        cmake.definitions["DBUILD_STATIC"] = not self.options.shared
+        cmake.definitions["BUILD_RTTR_DYNAMIC"] = self.options.build_rttr_dynamic
+        cmake.definitions["BUILD_UNIT_TESTS"] = self.options.build_unit_tests
+        cmake.definitions["BUILD_WITH_STATIC_RUNTIME_LIBS"] = self.options.build_with_static_runtime_libs
+        cmake.definitions["BUILD_WITH_RTTI"] = self.options.build_with_rtti
+        cmake.definitions["BUILD_BENCHMARKS"] = self.options.build_benchmarks
+        cmake.definitions["BUILD_EXAMPLES"] = self.options.build_examples
+        cmake.definitions["BUILD_DOCUMENTATION"] = self.options.build_documentation
+        cmake.definitions["BUILD_INSTALLER"] = self.options.build_installer
+        cmake.definitions["BUILD_PACKAGE"] = self.options.build_package
+        cmake.definitions["USE_PCH"] = self.options.use_pch
+        cmake.definitions["CUSTOM_DOXYGEN_STYLE"] = self.options.custom_doxygen_style
+        cmake.definitions["BUILD_WEBSITE_DOCU"] = self.options.build_website_docu
+
+        cmake.configure( source_folder="%s-%s" % (self.name, self.version))
+        cmake.build()
 
     def package(self):
         include_folder = "%s-%s/src" % (self.name, self.version)       
