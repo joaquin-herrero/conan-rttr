@@ -8,7 +8,11 @@ install:
 - sudo apt-get install -qq g++-4.9
 - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.9
 
+# Install SSL
+- apt-get install libffi-dev libssl-dev
+
 # Upgrade pip
+- pip install requests[security]
 - pip install --upgrade pip
 
 # Install conan
