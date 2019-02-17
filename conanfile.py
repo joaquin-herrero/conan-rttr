@@ -27,7 +27,7 @@ class RttrConan(ConanFile):
     def source(self):
         project_folder = "%s-%s" % (self.name, self.version)
         zip_name = "v%s.zip" % self.version
-        download ("%s/archive/%s" % (self.url, zip_name), zip_name, verify=False)
+        download ("%s/archive/%s" % (self.url, zip_name), zip_name, verify=True)
         unzip    (zip_name)
         os.unlink(zip_name)
 
