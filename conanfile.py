@@ -24,16 +24,16 @@ class RttrConan(ConanFile):
                        "custom_doxygen_style": [True, False],
                        "build_website_docu": [True, False]} 
     default_options = "shared=True", "build_rttr_dynamic=True", "build_unit_tests=False", "build_with_static_runtime_libs=False", "build_with_rtti=True", "build_benchmarks=False", "build_examples=False", "build_documentation=False", "build_installer=True", "build_package=True", "use_pch=True", "custom_doxygen_style=True", "build_website_docu=False"
-    source_folder = ""
+    project_folder = ""
 
     def source(self):
-        source_folder = "%s-%s" % (self.name, self.version)
+        self.project_folder = "%s-%s" % (self.name, self.version)
         zip_name = "v%s.zip" % self.version
         download ("%s/archive/%s" % (self.url, zip_name), zip_name, verify=False)
         unzip    (zip_name)
         os.unlink(zip_name)
 
-        tools.replace_in_file("%s/CMakeLists.txt" % (source_folder), '''project ("rttr" LANGUAGES CXX)''',
+        tools.replace_in_file("%s/CMakeLists.txt" % (self.project_folder), '''project ("rttr" LANGUAGES CXX)''',
                               '''project ("rttr" LANGUAGES CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()''')
@@ -55,15 +55,14 @@ conan_basic_setup()''')
         cmake.definitions["CUSTOM_DOXYGEN_STYLE"] = self.options.custom_doxygen_style
         cmake.definitions["BUILD_WEBSITE_DOCU"] = self.options.build_website_docu
 
-        cmake.configure( source_folder="%s-%s" % (self.name, self.version))
+        cmake.configure( source_folder="%s" % (self.project_folder))
         cmake.build()
 
     def package(self):
-        include_folder = "%s-%s/src" % (self.name, self.version)       
-        self.copy("*.h"  , dst="include", src=include_folder)
-        self.copy("*.rc" , dst="include", src=include_folder)
-        self.copy("*.h"  , dst="include", src="src")
-        self.copy("*.rc" , dst="include", src="src")
+        include_folder = "%s/src/rttr" % (self.project_folder)
+        self.copy("*.h"  , dst="include/rttr", src=include_folder)
+        self.copy("registration", dst="include/rttr", src="include_folder")
+        self.copy("type", dst="include/rttr", src="include_folder")
         self.copy("*.a"  , dst="lib", keep_path=False)
         self.copy("*.so" , dst="lib", keep_path=False)
         self.copy("*.lib", dst="lib", keep_path=False)
