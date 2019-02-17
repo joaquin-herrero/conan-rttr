@@ -11,7 +11,6 @@ class RttrConan(ConanFile):
     settings        = "arch", "build_type", "compiler", "os"
     generators      = "cmake"
     options         = {"shared": [True, False], 
-                       "build_rttr_dynamic": [True, False],
                        "build_unit_tests": [True, False],
                        "build_with_static_runtime_libs": [True, False],
                        "build_with_rtti": [True, False],
@@ -23,7 +22,7 @@ class RttrConan(ConanFile):
                        "use_pch": [True, False],
                        "custom_doxygen_style": [True, False],
                        "build_website_docu": [True, False]} 
-    default_options = "shared=True", "build_rttr_dynamic=True", "build_unit_tests=False", "build_with_static_runtime_libs=False", "build_with_rtti=True", "build_benchmarks=False", "build_examples=False", "build_documentation=False", "build_installer=True", "build_package=True", "use_pch=True", "custom_doxygen_style=True", "build_website_docu=False"
+    default_options = "shared=True", "build_unit_tests=False", "build_with_static_runtime_libs=False", "build_with_rtti=True", "build_benchmarks=False", "build_examples=False", "build_documentation=False", "build_installer=True", "build_package=True", "use_pch=True", "custom_doxygen_style=True", "build_website_docu=False"
 
     def source(self):
         project_folder = "%s-%s" % (self.name, self.version)
@@ -41,7 +40,7 @@ conan_basic_setup()''')
         cmake = CMake(self)
 
         cmake.definitions["DBUILD_STATIC"] = not self.options.shared
-        cmake.definitions["BUILD_RTTR_DYNAMIC"] = self.options.build_rttr_dynamic
+        cmake.definitions["BUILD_RTTR_DYNAMIC"] = self.options.shared
         cmake.definitions["BUILD_UNIT_TESTS"] = self.options.build_unit_tests
         cmake.definitions["BUILD_WITH_STATIC_RUNTIME_LIBS"] = self.options.build_with_static_runtime_libs
         cmake.definitions["BUILD_WITH_RTTI"] = self.options.build_with_rtti
@@ -67,7 +66,7 @@ conan_basic_setup()''')
         self.copy("type", dst="include/rttr", src=include_folder)
         self.copy("*.h", dst="include/rttr", src="src/rttr")
         self.copy("*.a"  , dst="lib", keep_path=False)
-        self.copy("*.so" , dst="lib", keep_path=False)
+        self.copy("*.so*" , dst="lib", keep_path=False)
         self.copy("*.lib", dst="lib", keep_path=False)
         self.copy("*.dylib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
