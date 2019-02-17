@@ -1,4 +1,4 @@
-from   conans       import ConanFile, CMake
+from   conans       import ConanFile, CMake, tools
 from   conans.tools import download, unzip
 import os
 
@@ -24,12 +24,19 @@ class RttrConan(ConanFile):
                        "custom_doxygen_style": [True, False],
                        "build_website_docu": [True, False]} 
     default_options = "shared=True", "build_rttr_dynamic=True", "build_unit_tests=False", "build_with_static_runtime_libs=False", "build_with_rtti=True", "build_benchmarks=False", "build_examples=False", "build_documentation=False", "build_installer=True", "build_package=True", "use_pch=True", "custom_doxygen_style=True", "build_website_docu=False"
+    source_folder = ""
 
     def source(self):
+        source_folder = "%s-%s" % (self.name, self.version)
         zip_name = "v%s.zip" % self.version
         download ("%s/archive/%s" % (self.url, zip_name), zip_name, verify=False)
         unzip    (zip_name)
         os.unlink(zip_name)
+
+        tools.replace_in_file("%s/CMakeLists.txt" % (source_folder), '''project ("rttr" LANGUAGES CXX)''',
+                              '''project ("rttr" LANGUAGES CXX)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()''')
 
     def build(self):
         cmake = CMake(self)
