@@ -39,7 +39,7 @@ conan_basic_setup()''')
     def build(self):
         cmake = CMake(self)
 
-        cmake.definitions["DBUILD_STATIC"] = not self.options.shared
+        cmake.definitions["BUILD_STATIC"] = not self.options.shared
         cmake.definitions["BUILD_RTTR_DYNAMIC"] = self.options.shared
         cmake.definitions["BUILD_UNIT_TESTS"] = self.options.build_unit_tests
         cmake.definitions["BUILD_WITH_STATIC_RUNTIME_LIBS"] = self.options.build_with_static_runtime_libs
