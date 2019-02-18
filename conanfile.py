@@ -72,4 +72,7 @@ conan_basic_setup()''')
         self.copy("*.dll", dst="bin", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["rttr_core_d"] if self.settings.build_type == "Debug" else ["rttr_core"]
+        libs = ["rttr_core_d"] if self.settings.build_type == "Debug" else ["rttr_core"]
+        if self.settings.os == "Linux":
+            libs += ["dl"]
+        self.cpp_info.libs = libs
