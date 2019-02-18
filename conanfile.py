@@ -72,13 +72,8 @@ conan_basic_setup()''')
         self.copy("*.dll", dst="bin", keep_path=False)
 
     def package_info(self):
-        libs = [""]
-        if self.settings.os == "Windows":
-            if self.options.shared == True:
-                libs = ["rttr_core_d"] if self.settings.build_type == "Debug" else ["rttr_core"]
-            else:
-                libs = ["librttr_core_d"] if self.settings.build_type == "Debug" else ["librttr_core"]
+        self.cpp_info.libdirs = ["lib", "bin"]
+        self.cpp_info.libs = tools.collect_libs(self)
+
         elif self.settings.os == "Linux":
-            libs = ["rttr_core_d"] if self.settings.build_type == "Debug" else ["rttr_core"]
-            libs += ["dl"]
-        self.cpp_info.libs = libs
+            self.cpp_info.libs += ["dl"]
