@@ -75,5 +75,5 @@ conan_basic_setup()''')
         self.cpp_info.libdirs = ["lib", "bin"]
         self.cpp_info.libs = tools.collect_libs(self)
 
-        elif self.settings.os == "Linux":
+        if self.settings.os == "Linux":
             self.cpp_info.libs += ["dl"]
