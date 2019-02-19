@@ -4,7 +4,7 @@ import os
 
 class RttrConan(ConanFile):
     name            = "rttr"
-    version         = "latest"
+    version         = "b3a131c"     
     description     = "Conan package for rttr."           
     url             = "https://github.com/rttrorg/rttr"
     license         = "MIT"                                         
@@ -25,11 +25,11 @@ class RttrConan(ConanFile):
     default_options = "shared=True", "build_unit_tests=False", "build_with_static_runtime_libs=False", "build_with_rtti=True", "build_benchmarks=False", "build_examples=False", "build_documentation=False", "build_installer=True", "build_package=True", "use_pch=True", "custom_doxygen_style=True", "build_website_docu=False"
 
     def source(self):
-        # latest working commit is b3a131c
-        version = "b3a131cf6a42c8bbcd7dd75c2acc9c61c0722775"
-
-        self.run( "git clone https://github.com/rttrorg/rttr.git" )
-        self.run( "cd rttr & git checkout %s" % (version))
+        project_folder = "%s-%s" % (self.name, self.version)
+        zip_name = "v%s.zip" % self.version
+        download ("%s/archive/%s" % (self.url, zip_name), zip_name, verify=True)
+        unzip    (zip_name)
+        os.unlink(zip_name)
 
         tools.replace_in_file("rttr/CMakeLists.txt", '''project ("rttr" LANGUAGES CXX)''',
                               '''project ("rttr" LANGUAGES CXX)
@@ -53,11 +53,14 @@ conan_basic_setup()''')
         cmake.definitions["CUSTOM_DOXYGEN_STYLE"] = self.options.custom_doxygen_style
         cmake.definitions["BUILD_WEBSITE_DOCU"] = self.options.build_website_docu
 
-        cmake.configure( source_folder="rttr")
+        project_folder = "%s-%s" % (self.name, self.version)
+
+        cmake.configure( source_folder="%s" % (project_folder))
         cmake.build()
 
     def package(self):
-        include_folder = "rttr/src/rttr"
+        project_folder = "%s-%s" % (self.name, self.version)
+        include_folder = "%s/src/rttr" % (project_folder)
         self.copy("*.h"  , dst="include/rttr", src=include_folder)
         self.copy("registration", dst="include/rttr", src=include_folder)
         self.copy("type", dst="include/rttr", src=include_folder)
