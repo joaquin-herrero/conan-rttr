@@ -4,7 +4,7 @@ import os
 
 class RttrConan(ConanFile):
     name            = "rttr"
-    version         = "b3a131c"     
+    version         = "latest"     
     description     = "Conan package for rttr."           
     url             = "https://github.com/rttrorg/rttr"
     license         = "MIT"                                         
@@ -23,15 +23,19 @@ class RttrConan(ConanFile):
                        "custom_doxygen_style": [True, False],
                        "build_website_docu": [True, False]} 
     default_options = "shared=True", "build_unit_tests=False", "build_with_static_runtime_libs=False", "build_with_rtti=True", "build_benchmarks=False", "build_examples=False", "build_documentation=False", "build_installer=True", "build_package=True", "use_pch=True", "custom_doxygen_style=True", "build_website_docu=False"
+    latest_version = "b3a131cf6a42c8bbcd7dd75c2acc9c61c0722775"
 
     def source(self):
-        project_folder = "%s-%s" % (self.name, self.version)
-        zip_name = "%s.zip" % self.version
-        download ("%s/archive/%s" % (self.url, zip_name), zip_name, verify=True)
+        url = "%s/archive/%s.zip" % (self.url, self.latest_version)
+        zip_name = "%s.zip" % (self.name)
+        source_folder = ("%s-%s" % (self.name, self.latest_version))
+
+        download (url, zip_name, verify=True)
         unzip    (zip_name)
         os.unlink(zip_name)
+        os.rename( source_folder, self.name )
 
-        tools.replace_in_file("rttr/CMakeLists.txt", '''project ("rttr" LANGUAGES CXX)''',
+        tools.replace_in_file("%s/CMakeLists.txt" % (self.name), '''project ("rttr" LANGUAGES CXX)''',
                               '''project ("rttr" LANGUAGES CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()''')
@@ -53,14 +57,11 @@ conan_basic_setup()''')
         cmake.definitions["CUSTOM_DOXYGEN_STYLE"] = self.options.custom_doxygen_style
         cmake.definitions["BUILD_WEBSITE_DOCU"] = self.options.build_website_docu
 
-        project_folder = "%s-%s" % (self.name, self.version)
-
-        cmake.configure( source_folder="%s" % (project_folder))
+        cmake.configure( source_folder=self.name)
         cmake.build()
 
     def package(self):
-        project_folder = "%s-%s" % (self.name, self.version)
-        include_folder = "%s/src/rttr" % (project_folder)
+        include_folder = "%s/src/rttr" % (self.name)
         self.copy("*.h"  , dst="include/rttr", src=include_folder)
         self.copy("registration", dst="include/rttr", src=include_folder)
         self.copy("type", dst="include/rttr", src=include_folder)
