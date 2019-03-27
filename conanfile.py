@@ -43,7 +43,7 @@ conan_basic_setup()''')
     def build(self):
         cmake = CMake(self)
 
-        cmake.definitions["BUILD_STATIC"] = not self.options.shared
+        cmake.definitions["BUILD_STATIC"] = False if self.options.shared else True
         cmake.definitions["BUILD_RTTR_DYNAMIC"] = self.options.shared
         cmake.definitions["BUILD_UNIT_TESTS"] = self.options.build_unit_tests
         cmake.definitions["BUILD_WITH_STATIC_RUNTIME_LIBS"] = self.options.build_with_static_runtime_libs
@@ -73,8 +73,10 @@ conan_basic_setup()''')
         self.copy("*.dll", dst="bin", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libdirs = ["lib", "bin"]
         self.cpp_info.libs = tools.collect_libs(self)
 
         if self.settings.os == "Linux":
             self.cpp_info.libs += ["dl"]
+
+        if self.options.shared == True:
+            self.cpp_info.defines = ["RTTR_DLL"]
